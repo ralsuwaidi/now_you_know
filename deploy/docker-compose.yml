@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: now_you_know:${NOW_YOU_KNOW_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    labels:
+      # Enables traefik for this container.
+    - traefik.enable=true
+    - traefik.http.routers.now_you_know.rule=Host(`${NOW_YOU_KNOW_TRAEFIK_HOST:-now_you_know.localhost}`)
+    - traefik.http.routers.now_you_know.entrypoints=http
+    - traefik.http.routers.now_you_know.service=now_you_know
+    - traefik.http.services.now_you_know.loadbalancer.server.port=${NOW_YOU_KNOW_PORT:-8000}
+    networks:
+    - default
+    - traefik-shared
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NOW_YOU_KNOW_HOST: 0.0.0.0
+      NOW_YOU_KNOW_DB_HOST: now_you_know-db
+      NOW_YOU_KNOW_DB_PORT: 5432
+      NOW_YOU_KNOW_DB_USER: now_you_know
+      NOW_YOU_KNOW_DB_PASS: now_you_know
+      NOW_YOU_KNOW_DB_BASE: now_you_know
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: now_you_know-db
+    environment:
+      POSTGRES_PASSWORD: "now_you_know"
+      POSTGRES_USER: "now_you_know"
+      POSTGRES_DB: "now_you_know"
+    volumes:
+    - now_you_know-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U now_you_know
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: now_you_know:${NOW_YOU_KNOW_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      NOW_YOU_KNOW_DB_HOST: now_you_know-db
+      NOW_YOU_KNOW_DB_PORT: 5432
+      NOW_YOU_KNOW_DB_USER: now_you_know
+      NOW_YOU_KNOW_DB_PASS: now_you_know
+      NOW_YOU_KNOW_DB_BASE: now_you_know
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "now_you_know-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  now_you_know-db-data:
+    name: now_you_know-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared
