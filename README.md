@@ -64,6 +64,17 @@ now_you_know
     └── lifetime.py  # Contains actions to perform on startup and shutdown.
 ```
 
+### Adding new model
+
+Steps to add a new model
+1. add a schema in `web/api/<modelname>`
+1. add to db/models
+1. add to db/dao
+1. add a view in `web/api/<modelname>`
+1. add an init in `web/api/<modelname.py>/__init__.py`
+1. add a route to web/api/routers.py
+
+
 ## Configuration
 
 This application can be configured with environment variables.

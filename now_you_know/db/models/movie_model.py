@@ -4,11 +4,12 @@ from sqlalchemy.sql.sqltypes import Integer, String
 from now_you_know.db.base import Base
 
 
-class DummyModel(Base):
+class MovieModel(Base):
     """Model for demo purpose."""
 
-    __tablename__ = "dummy_model"
+    __tablename__ = "movie_model"
 
     id = Column(Integer(), primary_key=True, autoincrement=True)
-    name = Column(String(length=200))  # noqa: WPS432
+    title = Column(String(length=200))  # noqa: WPS432
     year = Column(Integer())
+    rating = Column(String(length=10))  # noqa: WPS432

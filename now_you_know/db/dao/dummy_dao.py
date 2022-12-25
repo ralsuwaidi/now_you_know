@@ -14,13 +14,13 @@ class DummyDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_dummy_model(self, name: str) -> None:
+    async def create_dummy_model(self, name: str, year: int) -> None:
         """
         Add single dummy to session.
 
         :param name: name of a dummy.
         """
-        self.session.add(DummyModel(name=name))
+        self.session.add(DummyModel(name=name, year=year))
 
     async def get_all_dummies(self, limit: int, offset: int) -> List[DummyModel]:
         """

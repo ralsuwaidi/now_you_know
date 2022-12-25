@@ -1,9 +1,7 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
-class DummyModelDTO(BaseModel):
+class MovieModelDTO(BaseModel):
     """
     DTO for dummy models.
 
@@ -11,15 +9,17 @@ class DummyModelDTO(BaseModel):
     """
 
     id: int
-    name: str
-    year: Optional[int] = ...
+    title: str
+    year: int
+    rating: str
 
     class Config:
         orm_mode = True
 
 
-class DummyModelInputDTO(BaseModel):
+class MovieModelInputDTO(BaseModel):
     """DTO for creating new dummy model."""
 
-    name: str
+    title: str
     year: int
+    rating: str
